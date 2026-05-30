@@ -1,0 +1,751 @@
+\documentclass[a4paper]{article}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{graphicx}
+\newcommand{\highlight}[1]{\colorbox{gray}{$\displaystyle#1$}}
+\setcounter{MaxMatrixCols}{20}
+\makeatletter
+\renewcommand*\env@matrix[1][c]{\hskip -\arraycolsep
+  \let\@ifnextchar\new@ifnextchar
+  \array{*\c@MaxMatrixCols #1}}
+\makeatother
+\newcommand{\head}[1]{\textnormal{\textbf{#1}}}
+
+\begin{document}
+	\title{CS 131 Problem Set 1: \textit{Results and Discussion}}
+	\date{February 26, 2013}
+	\author{Joshua Frankie B. Rayo, Edward Nataniel C. Apostol\\ CS 131 WFY}
+	\maketitle{}
+
+	\section{SLE vs SNLE}
+		\subsection{Matrix Inverse}
+			The inverse of a nonsingular matrix needs to be explicitly computed because of several reasons.
+			We really need to find its inverse and they are required in order for us to move forward.
+			When we are calculating the inverse of a matrix, we are also studying its properties like the determinant, rank and adjoint.
+			We also use the inverse of a matrix for solving systems of equations, linear or nonlinear.
+			One important application of matrix inverse is cryptography [\textit{http://aix1.uottawa.ca/~jkhoury/cryptography.htm}].
+			Given a message matrix $M$, encryption matrix $A$ is used for encoding so that the encrypted message is $AM$.
+			For decryption, $A^{-1}$ is used so that $A^{-1}(AB)=B$.
+			
+		\subsection{Matrix Inverse as System of Linear Equations}
+			Finding the matrix inverse is also equivalent to simultaneous solution of systems of linear equations.
+			We want to satisfy the equation $AX=I$, where $I$ is an identity matrix.
+			Finding $X$ is equivalent to finding the inverse of $A$.
+			Since $I$ is a square matrix, the system $AX=I$ is actually a simultaneous system of linear equations.
+			We let $I = [i_{1}\: i_{2}\: ...\: i_{n}]$.
+			Actually we are solving for $x_{k}$'s in the system $Ax_{1}=i_{1},\: Ax_{2}=i_{2},\: ... ,\: Ax_{n}=i_{n}$.
+			When we obtained all the $x_{k}$'s, $X = [x_{1}\: x_{2}\: ...\: x_{n}]$ and $X$ is actually equal to $A^{-1}$.
+			
+		\subsection{Matrix Inverse as System of Nonlinear Equations}
+			Chapter 5 Computer Problem 5.17 of Heath (First Ed) shows another way on how we compute the inverse of a matrix using nonlinear systems of equations.
+			Consider the equation $AX=I$. We want to find the inverse of $A$.
+			It can be rewritten as $0=I-AX$ and we let a function $$\mathbf{F(X)=I-AX}$$
+			We know that $\mathbf{F(X)=0}$ if $\mathbf{X=A^{-1}}$. Finding its root is equivalent to finding the inverse of $\mathbf{A}$.
+			So we can use root-finding methods particularly Newton's method such that $\mathbf{F(X)=0}$. We recall the Newton's iterative scheme for systems of nonlinear equations:
+			$$\highlight{
+			\mathbf{
+				X_{k+1}=X_{k}-[F'(X_{k})]^{-1}F(X_{k})
+			}}
+			$$
+			For our specific problem, the Newton's iterative scheme is
+			$$
+			\mathbf{
+				X_{k+1}=X_{k}+A^{-1}(I-AX_{k})
+			}
+			$$
+			But $\mathbf{A^{-1}}$ is what we are solving, so we replace it by our approximation $\mathbf{X_{k}}$:
+			$$
+				\mathbf{X_{k+1}=X_{k}+X_{k}(I-AX_{k})}
+			$$
+			And the final form of Newton's iteration scheme for this problem is
+			\begin{equation}\highlight{
+				\mathbf{X_{k+1}=X_{k}(2I-AX_{k})}
+			}\end{equation}
+			Analogously, if we let our function $\mathbf{F(X)=AX-I=0}$, our iterative scheme is also the same.
+			Now we must prove the convergence of this iterative method.
+			Heath defines the residual matrix as
+			\begin{equation}
+				\mathbf{R_{k}=I-AX_{k}}
+			\end{equation}
+			and the error matrix as
+			\begin{equation}
+				\mathbf{E_{k}=A^{-1}-X_{k}}.
+			\end{equation}
+			Recall that an iterative method is said to have convergence of order $q\geq1$ if for asymptotic error constant $0<c<\infty$,
+			$$\highlight{
+				\epsilon_{n+1}=c\epsilon_{n}^{q}
+			}$$
+			when $n$ is large.
+			We evaluate $\mathbf{R_{k+1}}$ using equation (1) and equation (2):
+			$$
+			\begin{aligned}
+					R_{k+1}&=I-AX_{k+1}\\
+					&=I-A[X_{k}(2I-AX_{k})]\\
+					&=I-A(2X_{k}-AX^{2}_{k})\\
+					&=I-2AX_{k}+[AX_{k}]^{2}.
+			\end{aligned}
+			$$
+			We recall a property of matrices:
+			$$
+				(A+B)^{2} = A^{2}+ AB + BA + B^{2}.
+			$$
+			We evaluate $\mathbf{R_{k}^{2}}$ using equation (2) and apply the property given above:
+			$$
+			\begin{aligned}
+					R_{k}^{2}&=(I-AX_{k})(I-AX_{k})\\
+					&=I^{2}-IAX_{k}-AX_{k}I-[AX_{k}]^{2}\\
+					&=I-2AX_{k}+[AX_{k}]^{2}.
+			\end{aligned}
+			$$
+			We evaluate $\mathbf{E_{k+1}}$ using equation (1) and equation (3):
+			$$
+			\begin{aligned}
+				E_{k+1}&=A^{-1}-X_{k+1}\\
+				&=A^{-1}-[X_{k}(2I-AX_{k})]\\
+				&=A^{-1}-(2IX_{k}-AX^{2}_{k})\\
+				&=A^{-1}-2X_{k}+AX_{k}^{2}.
+			\end{aligned}
+			$$
+			Lastly, we evaluate $\mathbf{E_{k}AE_{k}}$ using equation (3):
+			$$\begin{aligned}
+				E_{k}AE_{k}&=(A^{-1}-X_{k})A(A^{-1}-X_{k})\\
+				&=(A^{-1}-X_{k})(I-AX_{k})\\
+				&=A^{-1}-X_{k}-X_{k}+AX_{k}^2\\
+				&=A^{-1}-2X_{k}+AX_{k}^2.
+			\end{aligned}$$
+			Given these relationships, we can conclude that
+			\begin{center}
+				$\mathbf{R_{k+1}=R_{k}^{2}}$ and $\mathbf{E_{k+1}=E_{k}AE_{k}=AE_{k}^{2}}$
+			\end{center}
+			and the iterative method for matrix inversion has quadratic convergence, with the original matrix $\mathbf{A}$ as the asymptotic error constant.
+		\subsection{Comparison of Matrix Inversion Methods}
+			Known methods for finding the inverse of a matrix are the Gauss-Jordan Reduction method, LU Factorization method and the Iterative Scheme discussed above.
+			The attached file \textit{ProblemOne.sce} contains the source code that implements the methods mentioned above.
+			Our program generates a random integer $n\in[5, 20]$ and generates a random $n\times{}n$ matrix with random integer entries on $[-10, 10]$.
+			We will compare the execution time of these methods for computing its inverse and gather the results.
+			For us to have a good comparison of the methods, we assume that the matrix to be used is \textit{nice}. We define a \textit{nice} matrix as follows:
+			\begin{itemize}
+				\item The matrix is not singular.
+				\item The LU decomposition of the matrix produces a permutation matrix equal to the identity matrix. This means that we do not have to rearrange the rows of a matrix to decompose it into lower and upper matrices.
+			\end{itemize}
+			If a randomly generated matrix does not belong to \textit{nice} matrices, we generate a matrix again for us to continue.
+			We used the \texttt{grand()} function of Scilab to generate random matrices.
+			\subsubsection{Gauss-Jordan Reduction Method}
+			We know that numbers like 2.220D-16 and -4.441D-16 are produced by Scilab because of its poor precision.
+			To handle this situation, we modified the condition for GJR method:
+			\begin{center}
+				\texttt{
+				if abs(M(k, k)) <= 1D-10 then
+				error('singular matrix!');
+				end
+				}
+			\end{center}
+			If a pivot has value practically zero then the matrix is singular and we abort the matrix inversion.
+			\subsubsection{LU Factorization Method}
+			Since this is not discussed in class, we provide the algorithm here.
+			\begin{enumerate}
+				\item Given a non-singular matrix $\mathbf{A}$, we decompose it as $\mathbf{A=LU}$ into lower and upper triangular matrices.
+				\item We solve the system $\mathbf{Lb_{1}=I_{1}, \:Lb_{2}=I_{2}, \:... ,\: Lb_{n}=I_{n}}$ using forward substitution.
+						$\mathbf{I_{i}}$'s are the corresponding column vectors of the identity matrix $\mathbf{I}$.
+				\item Then we solve the system $\mathbf{Ux_{1}=b_{1}, \:Ux_{2}=b_{2},\: ... ,\: Ux_{n}=b_{n}}$\\ using back substitution.
+				\item Matrix $\mathbf{X=[x_{1}\:x_{2}\:...\:x_{n}]}$ is now the inverse of $\mathbf{A}$.
+			\end{enumerate}
+			\subsubsection{Newton's Iterative Method}
+			Heath cited that a reasonable starting guess for approximating the inverse is to take
+			$$\mathbf{
+				X_{0}=\frac{A^{T}}{\left\|A\right\|_{1}\cdot\left\|A\right\|_{\infty}}.
+			}$$
+			So we take it as our starting guess and we implemented the iteration scheme discussed earlier.
+			The iteration will stop if $\mathbf{\left\|X_{k+1}-X_{k}\right\|_{1}}<1\times{}10^{-3}$.
+			Our program will display the number of iterations before the stopping condition is satisfied.
+			
+		\subsection{Results and Observations}
+			We used the \texttt{tic()} and \texttt{toc()} functions of Scilab to obtain the execution time of each method discussed to be used for comparison.
+			The machine used in running the script uses Intel\textsuperscript{\textregistered} Core\textsuperscript{\texttrademark} i3-2310 CPU @ 2.10GHz with 8.00GB of RAM.
+			We gather here five random \textit{nice} matrices and time elapsed for each methods.\\\\
+			Matrix 1:
+			$$\begin{bmatrix}[r]
+				-10 & 0 & -1 & 8 & -10 & 0 & 6 & -8 & 2 & 0 & 8 & -2 & 7 & 7 & 5 & -10 & 6 & 9 & -5 & 4 \\
+				-2 & -8 & -8 & -9 & -6 & 6 & 1 & 9 & -1 & -10 & -8 & -10 & -5 & -7 & -1 & 7 & 2 & 1 & -10 & -10 \\
+				-2 & 6 & 8 & 9 & -3 & -7 & 8 & -1 & 4 & -6 & 2 & 10 & 3 & 7 & -2 & 10 & 8 & -2 & 2 & -6 \\
+				6 & -4 & 10 & -10 & -2 & -7 & -1 & 7 & -6 & -8 & 3 & -4 & -4 & 7 & -3 & -9 & 9 & 3 & 5 & -5 \\
+				3 & 4 & 5 & -7 & 5 & -7 & 2 & 5 & -5 & 6 & 5 & 6 & -6 & 10 & -6 & 7 & -3 & 5 & -4 & 5 \\
+				-8 & 6 & -7 & 6 & -3 & 4 & 0 & -6 & -5 & 10 & -4 & -6 & 0 & 7 & 1 & 9 & 10 & -1 & 2 & 1 \\
+				-5 & -4 & -3 & -4 & 7 & -7 & -10 & 4 & 4 & 6 & -9 & -3 & 0 & -10 & -10 & -6 & 2 & 4 & -9 & -1 \\
+				-10 & 6 & -6 & 2 & 5 & -2 & -8 & 6 & 10 & 1 & 1 & -5 & -10 & 10 & 1 & -7 & 8 & -6 & -6 & 4 \\
+				-6 & 10 & -8 & -4 & 2 & -3 & 3 & -7 & -7 & 4 & 5 & -2 & 9 & -9 & -3 & 8 & 7 & 8 & 7 & 6 \\
+				3 & 8 & -9 & 7 & -8 & 9 & 10 & 8 & 4 & 3 & -8 & 1 & 10 & 9 & 0 & -1 & -1 & -10 & 0 & 0 \\
+				7 & -10 & 1 & 6 & 1 & -6 & -8 & 3 & 4 & 10 & -10 & -5 & -7 & -6 & -4 & -5 & -4 & -4 & 3 & -3 \\
+				8 & -9 & 4 & 5 & -9 & -8 & -3 & -7 & -2 & 7 & 10 & 6 & -6 & 1 & -1 & 6 & -8 & -2 & -4 & -8 \\
+				-10 & -8 & 2 & 9 & -10 & 2 & -7 & 5 & 9 & 3 & -8 & -9 & -3 & -4 & 8 & -10 & 2 & 5 & -2 & 10 \\
+				10 & 5 & -1 & 2 & 5 & -9 & 6 & -7 & -5 & 2 & 5 & 0 & -10 & -5 & -8 & -5 & -8 & 9 & -1 & 8 \\
+				-10 & 3 & -7 & 4 & -3 & -7 & -2 & -10 & 7 & 6 & 6 & 9 & 0 & 6 & 1 & -5 & -8 & 5 & -3 & -9 \\
+				-4 & -3 & -9 & 7 & 0 & 5 & -2 & 4 & -4 & -7 & -1 & -6 & 7 & -1 & 0 & -1 & -9 & -10 & 2 & 8 \\
+				0 & 10 & 1 & -5 & -5 & -2 & 4 & 8 & 3 & 9 & 9 & -6 & -1 & -9 & 4 & 0 & 4 & 1 & 2 & 7 \\
+				-9 & 6 & -3 & 9 & -9 & 6 & -9 & -7 & 9 & 9 & -3 & 10 & 4 & 7 & 5 & 5 & -9 & -1 & 0 & -1 \\
+				9 & -7 & 4 & 3 & -10 & -7 & 2 & 7 & -1 & -7 & -2 & -10 & 4 & 1 & -2 & 1 & 10 & -7 & -10 & 3 \\
+				-2 & -10 & -6 & 4 & 1 & -7 & -1 & -2 & 9 & 8 & 3 & -2 & -5 & 10 & -4 & -10 & 10 & -7 & 10 & 5 \
+			\end{bmatrix}$$
+			
+			Matrix 2:
+			$$\begin{bmatrix}[r]
+				8 & -1 & 4 & -9 & -8 & -7 & 1 & -2 \\
+				2 & 0 & -4 & -9 & -4 & 9 & -6 & -1 \\
+				-9 & 5 & -8 & -8 & 8 & -8 & 4 & 1 \\
+				9 & -9 & 7 & -5 & 5 & -8 & -4 & -9 \\
+				4 & 10 & 10 & -9 & 0 & 7 & -6 & -4 \\
+				-1 & -6 & 3 & 3 & 2 & 5 & -4 & -3 \\
+				3 & -4 & -3 & -8 & -4 & 6 & -8 & 9 \\
+				-6 & -8 & 6 & 6 & -3 & -10 & 7 & -8 \\
+			\end{bmatrix}$$
+			
+			Matrix 3:
+			$$\begin{bmatrix}[r]
+				-10 & 5 & 5 & 0 & -7 & -3 & 1 & 3 & 0 & 7 & -2 & -2 & 3 & -6 & 7 \\
+				1 & 2 & 0 & 7 & -6 & 0 & 9 & -9 & -2 & 3 & 5 & -3 & 9 & 1 & 2 \\
+				0 & -9 & -10 & 8 & -3 & 7 & -7 & 3 & -2 & 5 & 5 & 2 & 3 & -8 & 8 \\
+				5 & -10 & -1 & 3 & -5 & 10 & 1 & -6 & -8 & -9 & 2 & -2 & 0 & 1 & 7 \\
+				-4 & -7 & 1 & -8 & -9 & 8 & 8 & -2 & -10 & 8 & -9 & 0 & 1 & 10 & 8 \\
+				-3 & 4 & -4 & -9 & 10 & -8 & 9 & -7 & 6 & 3 & 2 & -9 & 9 & 0 & -5 \\
+				7 & -2 & -3 & 3 & -5 & 5 & -10 & -5 & -7 & 2 & 3 & -3 & 9 & -6 & 4 \\
+				10 & -8 & -7 & -2 & 10 & -4 & 9 & -9 & -2 & 9 & -2 & 2 & -4 & -8 & 4 \\
+				-10 & -9 & -3 & 9 & 3 & 2 & 3 & -10 & 5 & 3 & 9 & -1 & 6 & 3 & -9 \\
+				6 & 5 & 7 & -3 & 10 & -8 & -6 & -9 & 3 & -6 & -3 & -10 & -6 & 4 & -6 \\
+				2 & -10 & 10 & 7 & -3 & 2 & 4 & -2 & -5 & 7 & 9 & -3 & -4 & -3 & 7 \\
+				-2 & -2 & -5 & 5 & 9 & 3 & 0 & 1 & -9 & -8 & 10 & -4 & -7 & -6 & -1 \\
+				8 & -4 & 10 & -8 & -3 & 4 & -6 & 1 & -2 & 10 & 3 & -1 & -10 & -7 & -1 \\
+				4 & -1 & 1 & -4 & -3 & 8 & 4 & 8 & -3 & -2 & 3 & -10 & 8 & 10 & -2 \\
+				-3 & 9 & 6 & 6 & 1 & -10 & 5 & -1 & 9 & -5 & -8 & 1 & -7 & -6 & -5 \\
+			\end{bmatrix}$$
+			
+			Matrix 4:
+			$$\begin{bmatrix}[r]
+				-8 & -10 & -8 & 10 & -3 & 0 & 3 & 3 & 2 & -10 & -8 \\
+				-6 & 9 & -6 & -6 & -8 & 7 & -5 & -6 & -2 & -3 & 1 \\
+				-7 & -4 & -4 & -8 & -4 & 5 & -5 & -8 & 3 & -9 & -5 \\
+				-10 & -6 & -2 & 1 & -10 & 1 & -6 & -9 & -9 & -10 & 1 \\
+				0 & -4 & -3 & -6 & -6 & 7 & -1 & -2 & 10 & -7 & 3 \\
+				4 & -9 & 3 & 6 & -3 & -10 & 1 & -2 & -9 & -5 & -9 \\
+				10 & 9 & -10 & -5 & -3 & 7 & -7 & -1 & 8 & 2 & -5 \\
+				5 & -3 & 6 & -5 & -6 & 8 & 9 & 3 & -1 & 10 & -3 \\
+				3 & -7 & -1 & 10 & 3 & 3 & 2 & -8 & -9 & 6 & 0 \\
+				-10 & 9 & 10 & 4 & 0 & 10 & -10 & -2 & 6 & 1 & -8 \\
+				7 & -4 & 3 & -2 & -7 & -4 & -4 & -8 & -1 & -1 & 3 \\
+			\end{bmatrix}$$
+			
+			Matrix 5:
+			$$\begin{bmatrix}[r]
+				-5 & -7 & 1 & -4 & 8 \\
+				9 & -7 & -9 & 0 & 7 \\
+				-4 & 0 & -9 & 6 & 7 \\
+				0 & -5 & -2 & 0 & -10 \\
+				-6 & -8 & 3 & 1 & -6 \\
+			\end{bmatrix}$$
+			Matrix * is a square matrix of size 30, it is not practical to display it here.
+			\\\\
+			For each of the generated matrices, we have observed the following information:\\\\
+			\begin{tabular}{c c c c c}
+				\hline
+				\head{Matrix no.} &\head{Size} & \head{Gauss-Jordan Reduction} & \head{LU Factorization} & \head{Iterative Method / No. of iterations} \\
+				\hline
+				1 & 20 & 0.104000 sec & 0.017000 sec & 0.029000 sec / 17\\
+				2 & 8 & 0.008000 sec & 0.003000 sec & 0.006000 sec / 20\\
+				3 & 15 & 0.034000 sec & 0.007000 sec & 0.015000 sec / 20\\
+				4 & 10  & 0.017000 sec & 0.005000 sec & 0.011000 sec / 14\\
+				5 & 5 & 0.003000 sec & 0.003000 sec & 0.003000 sec / 12\\
+				* & 30 & 0.250000 sec & 0.031000 sec & 0.071000 sec / 20\\
+				\hline
+			\end{tabular}
+			\\\\\\
+			The performance of the methods are almost the same for small matrices, but they differ for large matrices.
+			We expected that the iterative method will perform fastest since it has quadratic convergence.
+			However, the LU Factorization method outperforms the other methods for large matrices.
+			Therefore we should use this method for matrix inversion.
+			Another aspect of the iterative method being slower than LU factorization is that the initial guess $\mathbf{X_{0}}$ is not good enough.
+			In fact, a journal from American Mathematical Society [\textit{http://www.ams.org/journals/mcom/1966-20-095/S0025-5718-66-99922-4/S0025-5718-66-99922-4.pdf}]
+			suggests that the initial guess for the iterative method should be
+			
+			$$
+			\mathbf{X_{0}=\alpha A^{T}}
+			$$
+			
+			\begin{center}
+			where
+			\end{center}
+			$$
+				0 < \alpha < \frac{2}{\lambda_{1}(\mathbf{AA^{T}})}
+			$$
+			
+			\begin{center}
+			and $\lambda_{1}(AA^{T})$ is the largest eigenvalue of $AA^{T}$.
+			\end{center}
+			The \texttt{myIter2()} function in the source code implements the iterative method with $\mathbf{X_{0}}$ given above, with $\alpha = \frac{1}{\lambda_{1}(\mathbf{AA^{T}})}$.
+			This requires less number of iterations for convergence than Heath's initial guess.
+			However, the LU factorization method still performs better.
+
+
+
+\section{LLSE vs NLLSE}
+	\subsection{Method of orthogonal transformations}
+	 Given set of points $(x_{i},y_{i})$ , the goal is to find  $g(x)$, the best-fit function that will represent the data points such that  if  $h_{i}$  is the actual y-value of the data point at $x = x_{i}$, then the linear sum of squares of the error $\xi_{i} = g(x_{i})-h_{i}$ is minimized.
+
+	The method of orthogonal transformations will be used in solving this problem. Since the orbit is elliptical, we will derive an equation for the planet's orbit by solving the parameter vector of the general form equation of an ellipse . We will express the problem in matrix form $Ap = b$ where p is the parameter vector. 
+
+The general form of an ellipse is : 
+
+	\begin{center}
+	$Bx^{2} + Cxy + Dy^{2} + Ex + Fy + G= 0$
+	\end{center}
+
+Dividing the whole equation by G,
+
+	\begin{center}
+		$\bar{B}x^{2} + \bar{C}xy + \bar{D}y^{2} + \bar{E}x + \bar{F}y + 1= 0 $ \\
+		$\bar{B}x^{2} + \bar{C}xy + \bar{D}y^{2} + \bar{E}x + \bar{F}y = -1 $
+	\end{center}
+
+The equation above is already linear. It means that we can write the equation in matrix from Ap = b where p is the parameter vector.
+
+			$$\begin{bmatrix}[r]
+				x_{1}^{2} & x_{1}y_{1} &y_{1}^2 & x_{1} & y_{1}\\
+				x_{2}^{2} & x_{2}y_{2} &y_{2}^2 & x_{2} & y_{2}\\
+				x_{3}^{2} & x_{3}y_{3} &y_{3}^2 & x_{3} & y_{3}\\
+				x_{4}^{2} & x_{4}y_{4} &y_{4}^2 & x_{4} & y_{4}\\
+				x_{5}^{2} & x_{5}y_{5} &y_{5}^2 & x_{5} & y_{5}\\
+				x_{6}^{2} & x_{6}y_{6} &y_{6}^2 & x_{6} & y_{6}\\
+				x_{7}^{2} & x_{7}y_{7} &y_{7}^2 & x_{7} & y_{7}\\
+				x_{8}^{2} & x_{8}y_{8} &y_{8}^2 & x_{8} & y_{8}\\
+				x_{9}^{2} & x_{9}y_{9} &y_{9}^2 & x_{9} & y_{9}\\
+				x_{10}^{2} & x_{10}y_{10} &y_{10}^2 & x_{10} & y_{10}\\
+
+			\end{bmatrix} \times \begin{bmatrix}[r]
+				\bar{B}\\
+				\bar{C}\\
+				\bar{D}\\
+				\bar{E}\\
+				\bar{F}\\
+			\end{bmatrix} = \begin{bmatrix}[r]
+					-1\\
+					-1\\
+					-1\\
+					-1\\
+					-1\\
+					-1\\
+					-1\\
+					-1\\
+					-1\\
+					-1\\
+			\end{bmatrix}$$
+
+Plugging in the valiues from the given points : 
+
+			$$\begin{bmatrix}[r]
+				1.02^{2} & 1.02 \times 0.39& 0.39^2 & 1.02 & 0.39\\
+				0.95^{2} & 0.85 \times 0.32 & 0.32^2 & 0.95 & 0.32\\
+				0.87^{2} & 0.87 \times 0.27 & 0.27^2 & 0.87 & 0.27\\
+				0.77^{2} & 0.77 \times 0.22 & 0.22^2 & 0.77 & 0.22\\
+				0.67^{2} & 0.67 \times 0.18& 0.18^2 & 0.67 & 0.18\\
+				0.56^{2} & 0.56 \times 0.15 & 0.15^2 & 0.56 & 0.15\\
+				0.44^{2} & 0.44 \times 0.13 & 0.13^2 & 0.44 & 0.13\\
+				0.30^{2} & 0.30 \times 0.12 & 0.12^2 & 0.30 & 0.12\\
+				0.16^{2} & 0.16 \times 0.13 & 0.13^2 & 0.16 & 0.13\\
+				0.01^{2} & 0.01 \times 0.15 & 0.15^2 & 0.01 & 0.15\\
+
+			\end{bmatrix} \times \begin{bmatrix}[r]
+				\bar{B}\\
+				\bar{C}\\
+				\bar{D}\\
+				\bar{E}\\
+				\bar{F}\\
+			\end{bmatrix} = \begin{bmatrix}[r]
+					-1\\
+					-1\\
+					-1\\
+					-1\\
+					-1\\
+					-1\\
+					-1\\
+					-1\\
+					-1\\
+					-1\\
+			\end{bmatrix}$$
+
+To solve this linear system $Ap = b$, we get the QR decompoition of the matrix A. Note that $Q^{T}Q = I$ and $||Q_{y}|| = ||y||$ and R is an upper triangular matrix. 
+\begin{center}
+		$ A = QR $ \\
+		$ Ap = QRp = b $
+\end{center}
+
+
+The implementation of the QR factorization is attached to the scilab script \texttt{Problem2-1.sci}. The QR factorization of matrix A produced the ff: matrices :
+
+			$$ Q = \begin{bmatrix}[r]
+
+- 0.5846 &   0.6796 &   0.0047 &  - 0.0244  & - 0.3783 & - 0.0851 & - 0.1341 & - 0.086 & - 0.0284 & - 0.1402 \\  
+  - 0.5071 &   0.0203 &  0.0671 &   0.1963 &  0.3937  &  0.1725  &  0.2595  &  0.2112 & 0.2195  &  0.5954\\
+  - 0.4253  & - 0.2609 &   0.0225  &  0.1724 & 0.3417 &  0.1419 &  0.1832 &  0.0747 & - 0.2271 & - 0.7023 \\
+  - 0.3331  & - 0.4068 & - 0.0403 &   0.0526 &  0.0285 &  - 0.2914 & - 0.4147  & - 0.5013 &  - 0.3658  &  0.2763\\
+  - 0.2522 & - 0.4141  & - 0.0751 & - 0.1101  & - 0.2812 & - 0.4387 & - 0.1183  & 0.3518 & 0.5676 & - 0.1253 \\
+  - 0.1762  & - 0.2928 &  - 0.0542 &  - 0.3224 &  - 0.3679  &  0.7804 & - 0.1551  & - 0.0401 &   0.0625 &   0.0483\\ 
+  - 0.1088 &  - 0.1067  & - 0.0044 & - 0.5127  & - 0.1670 & - 0.2128 &    0.7432 &  - 0.2463 & 0.0625 &  0.0483 \\
+  - 0.0506  &  0.0808  & - 0.0065 & - 0.5885 & 0.2599  & - 0.1009 & - 0.2789  &  0.5580 & - 0.4134 &   0.0823  \\
+  - 0.0144 &   0.1693 & - 0.2509 & - 0.4218  &  0.5203  & 0.0286  & - 0.1751 & - 0.4240 & 0.4748 & - 0.1512 \\
+  - 0.0001 &   0.0203 & - 0.9601 &   0.1588 & - 0.0617 &   0.0117 &   0.1014 &   0.1200 & - 0.1433 &   0.0586
+
+			\end{bmatrix}$$
+
+$$ R = \begin{bmatrix}[r]
+
+- 1.7797356  & - 0.5966001  & - 0.2029168  & -2.037538  &  - 0.6722965 \\
+    0.     &      0.0721568  &  0.0494166  & - 0.264499  & 0.0140506\\
+    0.  &         0.      &   - 0.0223774  & - 0.0771265   &  - 0.1790827 \\
+    0.    &       0.       &    0.      &   - 0.3701765  & - 0.1250072  \\
+    0.      &     0.     &      0.  &         0.      &    0.0390208 \\
+    0.      &     0.   &        0.    &       0.        & 0\\
+    0.       &    0.      &     0.      &     0.      &   0\\
+    0.       &    0.    &       0.        &   0.    &     0\\
+    0.       &    0.  &         0.          & 0.  &       0\\
+    0.        &   0.&           0.        &   0.&    0\\
+
+			\end{bmatrix}$$
+
+
+Pre-multiplying both sides by $Q^{T}$
+\begin{center}
+		$Q^{T}QRp = Q^{T}b$ \\
+\end{center}
+
+Since $Q^{T}Q = I$, 
+\begin{center}
+		$Rp = Q^{T}b$ \\
+		$ p = BackSubstitution(R,p)$
+\end{center}
+
+Since R is upper triangular, back substitution is used to obtain the values for the parameter vector. The implementation of the back substitution is also attached to the scilab script \texttt{Problem2-1.sci}. After back substitution, the computed p values are: 
+
+\begin{center}
+	$$ \begin{bmatrix}[r]
+	\bar{B}\\
+	\bar{C}\\
+	\bar{D}\\
+	\bar{E}\\
+	\bar{F}\\
+	\end{bmatrix} = \begin{bmatrix}
+	 2.2537948  \\
+    	0.0063247  \\
+    	5.5221834  \\
+ 	 - 1.2898102 \\ 
+ 	 - 7.3773544  \\
+	\end{bmatrix}$$
+\end{center}
+
+The equation of the planet's orbit is: 
+
+\begin{center}
+	$ g(x,y) = 2.2537948x^{2} + 0.0063247xy + 5.5221834y^{2} - 1.2898102x  - 7.3773544y = -1 $
+\end{center}
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[scale=1]{C:/Users/user/Desktop/problem2-1.jpg}
+	\caption{\small \sl Plot of  $2.2537948x^{2} + 0.0063247xy + 5.5221834y^{2} - 1.2898102x  - 7.3773544y = -1 $}
+\end{figure}
+
+To check if the equation above is a good representation of the planet's orbit, we plug-in the given data points to the equation and check how far it is from -1.
+
+\begin{center}
+			\begin{tabular}{c c}
+				\hline
+				\head{ point } & \head{ evaluation}\\
+				\hline
+				(1.02,0.39) & - 1.0054864 \\
+				(0.95,0.32) & - 0.984629   \\
+				(0.87,0.27) & - 1.0040704  \\
+				(0.77,0.22) & - 1.0115518    \\
+				(0.67,0.18) & - 1.0006866      \\
+				(0.56,0.15) & - 0.9973264      \\
+				(0.44,0.13) & - 0.9965512     \\
+			           (0.30,0.12) & - 0.9896369    \\
+				(0.16,0.13) & - 1.0142721  \\
+				(0.01,0.15) & - 0.9950173   \\
+
+
+				\hline
+			\end{tabular}
+\end{center}
+
+Note that the computed values for g(x,y) are all very near to -1. It means that the errors of the function that we obtained through orthogonal transformation are very small. 
+
+
+	\section{Interpolation}
+		\subsection{Interpolating Specific heat}
+			The attached file \texttt{ProblemThree.sce} contains the source code needed to perform interpolation on the given data.
+			We should note here that the specific heat ($c_p$) $J/gK$ of a material is dependent on temperature ($T$) in $K$.
+			$$
+			\begin{aligned}
+				f:&\:T\rightarrow c_p \\ c_p &= f(T)
+			\end{aligned}
+			$$
+			For a given set of data points $(x_i,\;y_i),\;i=1,\ldots,n$, the Newton interpolating function is given by
+			$$\highlight{
+				f(x) = a_1 + a_2(x-x_1) + a_3(x-x_1)(x-x_2) + \ldots + a_n(x-x_1)(x-x_2)...(x-x_{n-1}).
+			}$$
+			To interpolate a point, we first solve all the $a_i$'s using a triangular linear system or the forward divided differences.
+			However, using divided differences is easier to compute so we used it for implementation. From our reference book, it has form
+			$$\highlight{
+			\begin{aligned}
+				a_k = f[t_1,t_2,\ldots,t_k] &= \frac{f[t_2,t_3,\ldots,t_k]-f[t_1,t_2,\ldots,t_{k-1}]}{t_k-t_1}\\
+				f[t_k] &= y_k, k=1,\ldots,n
+			\end{aligned}
+			}$$
+			The divided differences are stored in a matrix to encourage dynamic programming.
+			We used the forward (or bottom-up) approach of dynamic programming to prevent stack overflow in cases when the recursive calls are very deep (i.e, we have large number of data points).
+			\\
+			After solving for $a_i$'s we compute $f(x)$ using Horner's Rule:
+			$$\highlight{
+			\begin{aligned}
+				f(x) = f_i &= a_{n-i} + (x-x_{n-i})f_{n-i},\:i=0,\ldots,n-1\\
+				f_0 &= a_n
+			\end{aligned}
+			}$$
+			Again, we used the bottom-up approach. Step by step calculations are printed in the Scilab console prior to the execution of the script.
+			\\
+			Moving on to the Cubic Spline interpolation, the interpolating function from the book [\textit{Numerical Methods for Scientists and Engineers 2e, Hoffman}] is given by
+			$$
+				f_i(x) = \frac{f''_i}{6(x_{i+1})-x_i}(x_{i+1}-x)^3 + \frac{f''_{i+1}}{6(x_{i+1}-x_i)}(x-x_i)^3 \\
+				+ \left[\frac{f_i}{x_{i+1}-x_i}-\frac{f''_i(x_{i+1}-x_i)}{6}\right](x_{i+1}-x) \\
+			$$
+			$$
+				+\left[\frac{f_{i+1}}{x_{i+1}-x_{i}}-\frac{f''_{i+1}(x_{i+1}-x_{i})}{6}\right](x-x_i)\\
+			$$
+			Contrary to the formula used in class, we used this to fix issues regarding with the indexes in the subscripts.
+			However, they are essentially the same. The second derivatives $f''_{i},\:i={2,3,\ldots,n-1}$ can be solved using the equation
+			$$
+				(x_i-x_{i+1})f''_{i-1}+2(x_{i+1}-x_{i-1})f''_i+(x_{i+1}-x_i)f''_{i+1}=6\left[\frac{f_{i+1}-f_i}{x_{i+1}-x_{i}}-\frac{f_i-f_{i-1}}{x_i-x_{i-1}}\right]
+			$$
+			with $f''_1=f''_n=0$. Solving for the second derivatives employs the use of tridiagonal matrices.
+			We present here the interpolated values at intervals of 10 K graphically versus the true values presented in\\ \texttt{http://www.kayelaby.npl.co.uk/general\_physics/2\_3/2\_3\_6.html}.
+			\begin{figure}[!h]
+				\centering
+					\includegraphics[scale=0.5]{C:/Users/user/Desktop/Interpolation.jpg}
+			\end{figure}
+		\subsection{Errors in approximation}
+			We use the two interpolating functions to predict the specific heat of aluminum when temperature is 273 K.
+			We compute the the relative and absolute error using the following formula:
+			$$\highlight{
+			\begin{aligned}
+				E_{rel} &= \frac{\left|\hat{x}-x\right|}{x}\\
+				E_{abs} &= \left|\hat{x}-x\right|
+			\end{aligned}
+			}$$
+			where $\hat{x}$ and $x$ denotes the approximated and true values, respectively.
+			The true value for $T = 273\:K$ is $c_p = 0.880\:J/gK$.
+			For Newton, $c_p = 1.0131019 J/gK$, $E_{rel} = 17.1612\%$ and $E_{abs} = 15.1019\%$.
+			While for Cubic Spline, $c_p = 1.027062 J/gK$, $E_{rel} = 16.7115\%$ and $E_{abs} = 14.7062\%$.
+			It seems that the errors are bit large.
+		\subsection{Inverse interpolation}
+			Instead of finding the specific heat given the temperature, we do the reverse.
+			Given the specific heat $c_p$, we should find the temperature $T$ such that $f(T) = c_p$.
+			This can be posed as a root-finding problem for the equation $f(T)-c_p=0$.
+			\\\\
+			We use the Regula-Falsi method for finding $T$ since its convergence is super-linear.
+			We chose the interval $T \in [150, 300]$ since $f(150)=0.9666216$ and $f(300)=1.04$ that satisfies the Intermediate Value Theorem.
+			Using Regula Falsi method with $tol = 1\times{}10^{-5}$, $T = 211.952312\:K$ for Newton, and $T = 216.975774\:K$ for Cubic Spline.
+	\section{Root-finding methods}
+	
+	\section{Roots}
+		\subsection{Newton's Method}
+			The Newton's method is a method for finding the zeroes of a real-valued function. In one variable, it is given by the iterative formula :  \\
+\begin{center}
+\scalebox{1.5}{$x_{i+1} = x_{i} - \frac{f(x_{0})}{f'(x_{0})} $}
+\end{center}
+
+An initial guess of the root of the given function $f(x)$ is needed. For the iterative formula to converge, the initial guess should  be near the actual root because the Newton's method inherits the properties of the Fixed-point method. \\
+
+The efficiency equation of the given engine for monoatomic gas can be rewritten to a form that can easily be solved using the Newton's method. First step is to express the equation as a function of a single variable. Since the problem is looking for values of $T_{2}/T_{1}$ that will make $\eta = 0.3$,  we can let $x = T_{2}/T_{1}$.  Rewriting the given efficiency equation :
+
+\begin{center}
+\scalebox{1.5}{$\eta =\frac{ ln(x) - (1-\frac{1}{x})}{ln(x)+\frac{(1-\frac{1}{x})}{(\frac{5}{3}-1)}}$}
+\end{center}
+ 
+Since the problem is to look for the value of $x$ that will make $\eta$ equals to 0.3, we can let $\eta = 0.3$.
+
+\begin{center}
+\scalebox{1.5}{$0.3 =\frac{ ln(x) - (1-\frac{1}{x})}{ln(x)+\frac{(1-\frac{1}{x})}{(\frac{5}{3}-1)}}$}
+\end{center}
+
+By transposing 0.3 to the other side of the equation, the original problem will now be reduced to a single variable root finding problem.We let this function be $f(x)$. 
+
+\begin{center}
+\scalebox{1.5}{$0 =\frac{ ln(x) - (1-\frac{1}{x})}{ln(x)+\frac{(1-\frac{1}{x})}{(\frac{5}{3}-1)}} - 0.3 = \eta - 0.3 = f(x)$}
+\end{center}
+
+The original problem can be solved by solving this equation.
+
+\begin{center}
+\scalebox{1.33}{$f(x) = 0$ where $f(x) = \eta-0.3$  and $\eta = \frac{ ln(x) - (1-\frac{1}{x})}{ln(x)+\frac{(1-\frac{1}{x})}{(\frac{5}{3}-1)}}$}
+\end{center}
+
+Simplifying the equation,
+
+\begin{center}
+\scalebox{1.5}{$f(x) =\frac{ ln(x) + \frac{1}{x} - 1 - \frac{3}{10}(ln(x) - \frac{3}{2x} + \frac{3}{2})}{ln(x) - \frac{3}{2x} + \frac{3}{2}} = 0 $}
+\end{center}
+\begin{center}
+\scalebox{1.5}{$f(x) =\frac{\frac{29}{20x} + \frac{7ln(x)}{10} - \frac{29}{20}}{ln(x) - \frac{3}{2x} + \frac{3}{2}} = 0 $}
+\end{center}
+
+In the given iterative formula for the Newton's method, the 1st derivative of the function is also needed. Solving for the 1st derivative of the function using quotient rule, 
+
+\begin{center}
+\scalebox{1.5}{ $f'(x) = \frac{(ln(x) - \frac{3}{2x} +  \frac{3}{2})(\frac{-29}{20x^{2}} + \frac{7}{10x}) - (\frac{29}{20x}+\frac{7lnx}{10}-\frac{29}{20})(\frac{1}{x}+\frac{3}{2x^{2}})}{(ln(x) - \frac{3}{2x} + \frac{3}{2})^{2}} $ }
+\end{center}
+
+Simplifying the equation above, 
+
+\begin{center}
+\scalebox{1.5}{$f'(x) =  \frac{ - \frac{5}{2x}  - \frac{5ln(x)}{2x^{2}} + \frac{5}{2x} }{ (ln(x))^{2} + \frac{9}{4x^{2}}  -  \frac{12ln(x) + 18}{4x}  +  3ln(x) + \frac{9}{4}    }$}
+\end{center}
+
+Now that we have defined f(x) and its first derivative, we need an initial value of x to start the iteration. Since both equations have x in the denominator and since both equations has ln(x) functions, we cannot start with x=0 and x=1. Also, since ln(x) is undefined for x<0, we must choose a positive number to start the iteration. 
+\\
+\\
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[scale=0.6]{C:/Users/user/Desktop/problem4point1-2.jpg}
+	\caption{\small \sl Graph of f(x)}
+\end{figure}
+\begin{figure}[!h]
+	\centering
+	\includegraphics[scale=0.6]{C:/Users/user/Desktop/problem4point1.jpg}
+	\caption{\small \sl Graph of f(x)}
+\end{figure}
+
+\indent
+In the attached scilab script  \texttt{Problem 4-1.sci}, $x_{old}$ is set to 6. As you can see 
+in the graph of the function, the root is near 6. So, 6 seems to be a good choice for the initial value of x. 
+\\
+\\
+\indent
+Two functions are defined in the script, the f(x) and f'(x). The Newton's method will use these 2 functions to evaluate the iterative formula. The stopping condition in the script for the iteration is if
+$\mid f(x_{old}) \mid < 10^{-6} $ 
+\\
+\\ \indent
+After 3 iterations, the  Newton's method converges to the root. 
+			\begin{center}
+			\begin{tabular}{c c c c}
+				\hline
+				\head{Iteration number} & \head{$x_{old}$} & \head{$f(x_{old})$} & \head{$x_{new}$ } \\
+				\hline
+				1 & 6 & 0.0150894 & 5.3733616 \\
+				2 & 5.3733616  & -0.0010794 & 5.4123696 \\
+				3 & 5.4123696  & -0.0000049 & 5.4125482 \\
+				\hline
+			\end{tabular}
+			\end{center}
+
+After the 3rd iteration, $x_{old} = 5.4125482$ and $f(x_{old}) = 0.00000000113$ which already satisfied the stopping condition $\mid f(x_{old}) \mid < 10^{-6} $.
+
+
+
+	\subsection{Secant method}
+
+Secant method is a root-finding method that successively uses the zeroes of the secant lines to approximate the roots of a real-valued function. The iterative formula for the secant method is:
+
+\begin{center}
+\scalebox{1.5}{$x_{n} = x_{n-1} - \frac{ f(x_{n-1})(x_{n-1}-x_{n-2}) }{f(x_{n-1})-f(x_{n-2})} $
+}
+\end{center}
+
+As can be seen from the iterative formula, secant method requires 2 initial points $x_{0}$ and $x_{1}$.Ideally, the 2 initial points should be close to the root. 
+\\
+\indent In the given problem, the roots of the frequency equation $f(\beta) = cosh(\beta)cos(\beta) + 1 = 0$ is related to the natural frequencies of a uniform cantilever beam. The given frequency equation is a root finding problem that can be solved using the secant method. 
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[scale=0.6]{C:/Users/user/Desktop/problem4-2.jpg}
+	\caption{\small \sl Graph of $f(\beta)$}
+\end{figure}
+
+By inspecting the graph of the frequency equation, it can be seen that there are four distinct roots $(\beta_{i})$. After solving for the roots, we can substitute the $\beta_{i}$ 's to the equation $\beta_{i}^{4} = (2\pi f_{i})^{2} \frac{mL^{3}}{EI}$ to obtain the corresponding $f_{i}$'s. To get the lowest 2 frequencies, we will just compare the values of the computed $f_{i}$'s
+\\
+\\
+\indent
+First step is to select 2 points that are close to the four roots. By inspection of the graph, the following points are selected:
+
+\begin{center}
+			\begin{tabular}{c c c c}
+				\hline
+				\head{Root} & \head{1st point} & \head{2nd point}\\
+				\hline
+				leftmost root & -5 & -5.5\\
+				2nd from the left & -2  & -2.5\\
+				3rd from the left & 1.5  & 1 \\
+				rightmost root & 4.5  & 4 \\
+				\hline
+			\end{tabular}
+\end{center}
+
+In the attached scilab script \texttt{Problem4-2.sci}, The secant method is implemented as a function with the 2 initial points as its parameters. The $\beta_{i}$ 's are computed by calling and passing the 2 initial points to the secantmethod function. After the execution, the script produces the ff. values of $\beta$.
+
+\begin{center}
+			\begin{tabular}{c c}
+				\hline
+				\head{Root} & \head{point}\\
+				\hline
+				leftmost root & - 4.6940911 \\
+				2nd from the left & - 1.8751041\\
+				3rd from the left & 1.8751041   \\
+				rightmost root & 4.6940911\\
+				\hline
+			\end{tabular}
+\end{center}
+
+Now that the roots are computed, the corresponding $f_{i}$'s can be computed by substituting it to the given formula  $\beta_{i}^{4} = (2\pi f_{i})^{2} \frac{mL^{3}}{EI}$. The moment of inertia of the cross section $I$ can be computed using the formula $I = \frac{wh^{3}}{12}$ where w and h are the widht and height of the cross section respectively. Since the width of the cross section is 25 mm (0.025m)  and the height is 2.5mm (0.0025m), then, $I = \frac{(0.025 m)(0.0025 m)^{3}}{12} = 3.255 x 10^{-11}$. The volume of the steel beam with a rectangular cross section can be computed as $v =(length)(width)(height) = (0.9m)(0.025 m)(0.0025 m) = 0.0000563 m^{3}$.  The mass of the beam can be computed using the formula $m = (density)(volume) = (7850 \frac{kg}{m^{3}})(0.0000563 m^{3}) = 0.441955 kg.$ Simplifying the equation and expressing in terns of $f_{i}$,
+
+\begin{center}
+\scalebox{1.5}{
+$\beta_{i}^{4} = (2\pi f_{i})^{2} \frac{mL^{3}}{EI}$
+}
+
+\scalebox{1.5}{
+$f_{i} = \sqrt[2]{ \frac{\beta_{i}^{4}EI}{4\pi^{2}mL^{3}}        }$
+}
+
+\scalebox{1.5}{
+$f_{i} = \sqrt[2]{ \frac{\beta_{i}^{4}EI}{4\pi^{2}mL^{3}}        }$
+}
+
+\scalebox{1.5}{
+$f_{i} = \sqrt[2]{ \frac{\beta_{i}^{4}(200)(3.225 x 10^{-11})}{4\pi^{2}(0.441955)(0.9)^{3}}        }$
+}
+
+\scalebox{1.5}{
+$f_{i} = \sqrt[2]{  5.123 x 10^{-10} \beta_{i}^{4}  }$
+}
+
+\end{center}
+
+Substituting the values of the computed $\beta_{i}$'s to the equation above, the following values of  $f_{i}$'s are obtained :
+
+\begin{center}
+			\begin{tabular}{c c c}
+				\hline
+				\head{root position } & \head{Beta / Root}  & \head{corresponding $f_{i}$}\\
+				\hline
+				leftmost root & - 4.6940911 & 0.0017779 \\
+				2nd from the left & - 1.8751041 & 0.0002837 \\
+				3rd from the left & 1.8751041 & 0.0002837    \\
+				rightmost root & 4.6940911 & 0.0017779\\
+				\hline
+			\end{tabular}
+\end{center}
+
+By inspection, the lowest two frequencies of the steel beam are \textbf{ 0.0002837} and \textbf{0.0017779}. 
+
+	
+
+
+\end{document}
