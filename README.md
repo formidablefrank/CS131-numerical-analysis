@@ -16,7 +16,7 @@ Through this coursework, I developed skills in:
 
 I understand how to select appropriate numerical methods based on the problem, implement them with consideration for floating-point precision and convergence behavior, and conduct rigorous mathematical analysis of computational results.
 
-## Coding Exercises and Problem Sets
+## Problem Sets
 
 **Problem Set 1: Systems of Linear and Nonlinear Equations**
 - Matrix inversion via Gauss-Jordan reduction and LU factorization
@@ -30,7 +30,7 @@ I understand how to select appropriate numerical methods based on the problem, i
 - Numerical integration with composite Simpson's rule and Gauss-Laguerre quadrature
 - Applications to probability and financial mathematics
 
-**Additional Topics Covered:**
+**Additional Topics:**
 - Interpolation methods and their applications
 - Numerical stability and precision handling in floating-point arithmetic
 
