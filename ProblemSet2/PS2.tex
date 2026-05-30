@@ -1,0 +1,283 @@
+\documentclass[10pt, twocolumn]{article}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage[margin=.3in]{geometry}
+\usepackage{pdflscape}
+\newcommand{\highlight}[1]{\colorbox{gray}{$\displaystyle#1$}}
+\newcommand{\head}[1]{\textnormal{\textbf{#1}}}
+\setlength{\columnsep}{.5in}
+\DeclareMathOperator{\GE}{GE}
+
+\begin{document}
+	\title{\textbf{CS 131 Problem Set 2}}
+	\author {Catherine Angangco, Joshua Frankie Rayo}
+	\maketitle
+	
+	\section{Value-at-Risk}
+		\subsection{Preliminaries}
+		The value at risk \textit{VaR} of a continuous loss distribution modeled by a probability distribution function, say $p(x)$ at a given risk level $(1-\alpha)\in[0,1]$ is defined as the value at which the cumulative probability of $p(x)$ from $-\infty$ is equal to $\alpha$.
+		Mathematically speaking, we say:
+		$$VaR_{\alpha} = z \Leftrightarrow \int^{z}_{-\infty}p(x)dx=\alpha
+		$$
+		A value $z$ is the value-at-risk at $a$ if and only if the area under the curve of $p(x)$ in the interval $(-\infty,z]$ is equal to $\alpha$.
+		We first observe the properties of the probability functions 
+		$$p_1(x)=\frac{1}{\sqrt{6\pi}}e^{-\frac{x^2}{6}}$$ 
+		\begin{center}
+			and
+		\end{center}
+		 $$ p_2(x)=\frac{1}{\gamma\sqrt{3\pi}}\left(1+\frac{x^2}{3}\right)^{-2}, \gamma\approx0.886226925453$$
+		where $p_1(x)$ is a Gaussian distribution function and $p_2(x)$ is a t distribution function.
+		\begin{itemize}
+			\item We know that these functions are symmetric to some line $x=\mu$, where $\mu$ is the mean of the distribution.
+				When $\mu=0$, its graph is symmetric to the line $x=0$ or y-axis. It has the property
+				$$
+					\int^{n}_{m}p(x)dx=\int^{-m}_{-n}p(x)dx
+				$$
+				for $m\leq n$.
+			\item The functions above are probability distribution functions. It follows that the sum of the probabilities in the sample space is equal to 1. Or equivalently,
+				\begin{equation}
+					\sum_{\forall x}p(x)=\int_{-\infty}^{\infty}p(x)dx=1
+				\end{equation}
+			\item We redefine the limits of integration (i.e.) split equation (2) into two as follows:
+				\begin{equation}
+					\int_{-\infty}^{\infty}p(x)dx=\int_{-\infty}^{0}p(x)dx + \int_{0}^{\infty}p(x)dx
+				\end{equation}
+			\item Since the graph of the function is symmetric to y-axis, the area under the curve in the interval $[0,\infty)$ is also equal to the area uder the curve in the interval $(-\infty,0)$. Using equation (1) and (2),
+				\begin{equation}
+					\int_{-\infty}^{0}p(x)dx = \int_{0}^{\infty}p(x)dx = 0.5
+				\end{equation}
+		\end{itemize}
+		Now, we verify if $\int_{0}^{\infty}p(x)dx = 0.5$ using Gauss-Laguerre quadrature.
+		For $p_1(x)$, the Gauss-Laguerre quadrature form of the integral is
+		$$I_1 = \int_{0}^{\infty}e^{-x}\left(\frac{e^{x}}{\sqrt{6\pi}}e^{-\frac{x^2}{6}}\right)dx=
+			\int_{0}^{\infty}e^{-x}\left(\frac{1}{\sqrt{6\pi}}e^{x-\frac{x^2}{6}}\right)dx
+		$$
+		where the weighting function $w(x)=e^{-x}$ and $g_1(x)=\frac{1}{\sqrt{6\pi}}e^{x-\frac{x^2}{6}}$. By Gaussian quadratures approximation,
+		$$I_1 \approx \sum_{i=1}^{n}A_ig_1(x_i)
+		$$
+		where $i$ is the number of nodes for approximation. We use $n=6$ nodes. The nodal abscissas and corresponding weights for $n=6$ is given below.
+		\begin{center}
+		\begin{tabular}{ccc}
+			\hline
+			\head{$i$} & \head{$x_i$} & \head{$A_i$}\\
+			\hline
+			1 & 0.222 847 & 0.458 964 \\
+			2 & 1.188 932 & 0.417 000 \\
+			3 & 2.992 736 & 0.113 373 \\
+			4 & 5.775 144 & 0.010 399 2 \\
+			5 & 9.837 467 & 0.000 261 017 \\
+			6 & 15.982 874 & 0.000 000 898 548 \\
+			\hline
+		\end{tabular}
+		\end{center}
+		To solve the integral,
+		$$\begin{aligned}
+			I_1 &= A_1g_1(x_1) + A_2g_1(x_2) + A_3g_1(x_3)\\
+				&+ A_4g_1(x_4) + A_5g_1(x_5) + A_6g_1(x_6)\\
+			I_1 &= 0.458964\cdot0.285454 + 0.417000\cdot0.597557\\
+				&+ 0.113373\cdot1.03226 + 0.0103992\cdot0.285985\\
+				&+ 0.000261017\cdot0.000426427\\
+				&+ 8.98548\times10^{-7}\cdot6.50687\times10^{-13}\\
+			I_1 &= 0.500198 \approx 0.5
+		\end{aligned}$$
+		
+		For $p_2(x)$, the Gauss-Laguerre quadrature form of the integral is
+		$$I_2=\int_{0}^{\infty}e^{-x}\left(\frac{e^x}{\gamma\sqrt{3\pi}}\left(1+\frac{x^2}{3}\right)^{-2}\right), \gamma\approx0.886226925453$$
+		where the weighting function $w(x)=e^{-x}$ and $g_2(x)=\frac{e^x}{\gamma\sqrt{3\pi}}\left(1+\frac{x^2}{3}\right)^{-2}$. By Gaussian quadratures approximation,
+		$$I_2 \approx \sum_{i=1}^{n}A_ig_2(x_i)$$
+		We used again $n=6$ nodes, and the nodal abscissas and weights above.
+		
+		To solve the integral,
+		$$\begin{aligned}
+			I_2 &= A_1g_2(x_1) + A_2g_2(x_2) + A_3g_2(x_3)\\
+				&+ A_4g_2(x_4) + A_5g_2(x_5) + A_6g_2(x_6)\\
+			I_2 &= 0.458964\cdot0.444468 + 0.417000\cdot0.55761\\
+				&+ 0.113373\cdot0.461408 + 0.0103992\cdot0.806524\\
+				&+ 0.000261017\cdot6.22113\\
+				&+ 8.98548\times10^{-7}\cdot432.589\\
+			I_2 &= 0.499229 \approx 0.5
+		\end{aligned}$$
+		And now we established equation (3), (2), and (1).
+		
+		Going back to our original problem, take note that we are only estimating the value-at-risks for $\alpha\geq0.5$, so we know that $z\geq0$.
+		Therefore we should use the relationship that
+		$$\highlight{
+		\begin{aligned}
+			\int_{-\infty}^{z}p(x)dx &= \int_{-\infty}^{0}p(x)dx + \int_{0}^{z}p(x)dx\\
+				&= 0.5 + \int_{0}^{z}p(x)dx\\
+				&= \alpha
+		\end{aligned}}$$
+		
+		So it only remains to compute for $\int_{0}^{z}p(x)dx$.
+		We use composite Simpson's 1/3 rule with 6 points also..
+		
+		The general integral $\int_{a}^{b}f(x)dx$ can be numerically solved using the composite Simpson's 1/3 rule:
+		\begin{equation}\highlight{
+		\begin{aligned}
+			\int_{a}^{b}f(x)dx &= \frac{h}{3}f(a) + \frac{4h}{3}\sum_{i\:even}f(x_i)\\
+			&+ \frac{2h}{3}\sum_{i\:odd}f(x_i) + \frac{h}{3}f(b)\\
+			h &= \frac{b-a}{n}
+		\end{aligned}}
+		\end{equation}
+		where $n$ is the number of panels. The next step is to model our integral $\int_{0}^{z}p(x)dx$ as a function, say $P(z)$ so that we can use root-finding method for the equation $0.5 + P(z)-\alpha=0$.
+		
+		\subsection{VaR estimates using Gaussian distribution}
+		We first divide the interval $[0, z]$ into five panels with 6 points with 5 panels: $\{0, z/5, 2z/5, 3z/5, 4z/5, 5z/5, z\}$.
+		Using equation (4), the integral $\int_{0}^{z}\frac{1}{\sqrt{1\pi}}e^{-\frac{x^2}{6}}dx = \int_{0}^{z}p_1(x)dx$ is:
+		$$
+		\begin{aligned}
+			\int_{0}^{z}p_1(x)dx &= \frac{h}{3}p_1(0) + \frac{4h}{3}p_1\left(\frac{z}{5}\right) + \frac{2h}{3}p_1\left(\frac{2z}{5}\right)\\
+				&= \frac{4h}{3}p_1\left(\frac{3z}{5}\right) + \frac{2h}{3}p_1\left(\frac{4z}{5}\right) + \frac{h}{6}p_1(z)\\
+				&= P_1(z)\\
+				h &= \frac{z}{5}
+		\end{aligned}
+		$$
+		And now we try to estimate the VaR with $\alpha=0.8$.
+		Then we use Regula-Falsi method for the equation $0.5 + P_1(z) - 0.8 = P_1(z)-0.3=0=Q_1(z)$, with $z\in[0,1]$ and $tol=10^{-9}$.
+		The file \texttt{PS2\_1.sce} implements the root-finding method, the root converges to 1.567 692 7.
+		
+		\subsection{VaR estimates using t distribution}
+		Using equation (4), the integral $$\int_{0}^{z}\frac{1}{\gamma\sqrt{3\pi}}\left(1+\frac{x^2}{3}\right)^{-2} = \int_{0}^{z}p_2(x)dx$$ is:
+		$$
+		\begin{aligned}
+			\int_{0}^{z}p_2(x)dx &= \frac{h}{3}p_2(0) + \frac{4h}{3}p_2\left(\frac{z}{5}\right) + \frac{2h}{3}p_2\left(\frac{2z}{5}\right)\\
+				&= \frac{4h}{3}p_2\left(\frac{3z}{5}\right) + \frac{2h}{3}p_2\left(\frac{4z}{5}\right) + \frac{h}{6}p_2(z)\\
+				&= P_2(z)\\
+				h &= \frac{z}{5}
+		\end{aligned}
+		$$
+		And now we try to estimate the VaR with $\alpha=0.8$.
+		Then we use Regula-Falsi method for the equation $0.5 + P_2(z) - 0.8 = P_2(z)-0.3=0=Q_2(z)$, with $z\in[0,1]$ and $tol=10^{-9}$.
+		The root converges to 1. 053 385 1.
+		We estimate the VaR with $\alpha\in[0.8, 0.99]$ at intervals of 0.01 for the two models.
+		Results are displayed in a tabular and graphical form when the \texttt{PS2\_1.sce} is run.
+		
+	\section{Naive Fourier Series Approximation}
+	\section{Halley's Comet}
+	\section{Yeast Growth Modelling}
+	\subsection{Preliminaries}
+	Recall the Runge-Kutta order 4 method for numerical solution of first-order differential equation. Given a differential equation
+	$$\frac{dy}{dt} = f(t, y)
+	$$
+	the numerical solution of the differential equation with RK4 is
+	\begin{equation}
+	\highlight{
+		\begin{aligned}
+			x_1 &= f\left(t_n, y_n\right)\\
+			x_2 &= f\left(t_n + \frac{\Delta t}{2}, y_n + x_1 \frac{\Delta t}{2}\right)\\
+			x_3 &= f\left(t_n + \frac{\Delta t}{2}, y_n + x_2 \frac{\Delta t}{2}\right)\\
+			x_4 &= f\left(t_n + \Delta t, y_n + x_3 \Delta t\right)\\
+			x &= \frac{x_1+2x_2+2x_3+x_4}{6}\\
+			y_{n+1} &= y_n + x\Delta t
+		\end{aligned}
+	}
+	\end{equation}
+	Where $f$ is the differential equation, $y$ is the dependent variable, $t$ is the dependent variable, $x$ is the approximated slope and $\Delta t$ is the increment for the independent variable.\\
+	Also recall the Gauss-Newton optimization for nonlinear curve fitting. 
+	The optimum parameter vector $\mathbf{P}=[p_1\:p_2\:...p_n]$ for a parameterized function $f_p(x)$ to fit with $n$ points $(x_n, y_n)$ can be obtained using the iteration
+	\begin{equation}
+	\highlight{
+		\begin{aligned}
+			\mathbf{P_{new}} &= \mathbf{P_{old}} - \delta\\
+			\delta &= \GE\mathbf{(J_r^TJ_r, J_r^Tr)}\\
+			\mathbf{r} &= 
+				\begin{bmatrix}
+					f_p(x_1)-y_i\\
+					\vdots\\
+					f_p(x_n)-y_n\\
+				\end{bmatrix}
+		\end{aligned}
+	}
+	\end{equation}
+	where $\mathbf{r}$ is the residual matrix and $\mathbf{J_r}$ is the Jacobian of the residual matrix.
+	The iteration will stop if $\left\|x_new - x_old\right\|_2 \leq tol$.
+	
+	\subsection{Logistic Model}
+	The logistic growth model of yeast is given by
+	$$\frac{dP}{dt} = kP(C-P) = f(t, P)
+	$$
+	where $P$ is the current population. Variables $k$ and $C$ are the parameters of the differential equation.
+	Now, we obtain the solution of this model using RK4 with $\Delta t=1$ using equation (5). See next page:
+	
+	\begin{landscape}
+	$$\begin{aligned}
+		x_1 &= kP_n(C-P_n)\\
+		x_2 &= k\left(P_n + \frac{1}{2}kP_n(C-P_n)\right)
+			\left(C-\left(P_n + \frac{1}{2}kP_n(C-P_n)\right)\right)\\
+		x_3 &= k\left(C-P_n-\frac{1}{2}k\left(C-P_n-\frac{1}{2}kP_n(C-P_n)\right)\left(P_n+\frac{1}{2}kP_n(C-P_n)\right)\right)
+			\left(P_n+\frac{1}{2}k\left(C-P_n-\frac{1}{2}kP_n(C-P_n)\right)\left(P_n+\frac{1}{2}kP_n(C-P_n)\right)\right)\\
+		x_4 &= k\left(C-P_n-k\left(C-P_n-\frac{1}{2}k\left(C-P_n-\frac{1}{2}kP_n(C-P_n)\right)\left(P_n+\frac{1}{2}kP_n(C-P_n)\right)\right)\left(P_n + \frac{1}{2}k\left(C-P_n-\frac{1}{2}kP_n(C-P_n)\left(P_n+\frac{1}{2}kP_n(C-P_n)\right)\right)\right)\right)\\
+			& \left(P_n+k\left(C-P_n-\frac{1}{2}k\left(C-P_n-\frac{1}{2}kP_n(C-P_n)\right)\left(P_n+\frac{1}{2}kP_n(C-P_n)\right)\right)\left(P_n + \frac{1}{2}k\left(C-P_n-\frac{1}{2}kP_n(C-P_n)\left(P_n+\frac{1}{2}kP_n(C-P_n)\right)\right)\right)\right)\\
+		x &= \frac{x_1+2x_2+2x_3+x_4}{6}\\
+	\end{aligned}$$
+	$$\begin{aligned}
+		P_{n+1} &= P_n + \frac{k}{6}P_n(C-P_n) + \frac{2k}{6}\left(P_n + \frac{1}{2}kP_n(C-P_n)\right)\left(C-\left(P_n + \frac{1}{2}kP_n(C-P_n)\right)\right)\\
+				&+ \frac{2k}{6}\left(C-P_n-\frac{1}{2}k\left(C-P_n-\frac{1}{2}kP_n(C-P_n)\right)\left(P_n+\frac{1}{2}kP_n(C-P_n)\right)\right)\left(P_n+\frac{1}{2}k\left(C-P_n-\frac{1}{2}kP_n(C-P_n)\right)\left(P_n+\frac{1}{2}kP_n(C-P_n)\right)\right)\\
+				&+ \frac{k}{6}\left(C-P_n-k\left(C-P_n-\frac{1}{2}k\left(C-P_n-\frac{1}{2}kP_n(C-P_n)\right)\left(P_n+\frac{1}{2}kP_n(C-P_n)\right)\right)\left(P_n + \frac{1}{2}k\left(C-P_n-\frac{1}{2}kP_n(C-P_n)\left(P_n+\frac{1}{2}kP_n(C-P_n)\right)\right)\right)\right)\\
+				& \left(P_n+k\left(C-P_n-\frac{1}{2}k\left(C-P_n-\frac{1}{2}kP_n(C-P_n)\right)\left(P_n+\frac{1}{2}kP_n(C-P_n)\right)\right)\left(P_n + \frac{1}{2}k\left(C-P_n-\frac{1}{2}kP_n(C-P_n)\left(P_n+\frac{1}{2}kP_n(C-P_n)\right)\right)\right)\right)\\
+	\end{aligned}$$
+	\end{landscape}
+	And this is the function we want to optimize, using different values of $P_n$ (independent variable) and $P_{n+1}$ (dependent variable).
+	Take note that the current population is dependent on the previous population.
+	In this case, $P_{n+1}$ is a function of $P_n$ parameterized by $k$ and $C$. We let $P_{n+1} = f_{<k, C>}(P_n)$.
+	Given the appendix data, we form the residual matrix.
+	$$\mathbf{r} = 
+		\begin{bmatrix}
+			f_{<k, C>}(1.03519) - 1.06937\\
+			f_{<k, C>}(1.06937) - 1.12796\\
+			f_{<k, C>}(1.12796) - 1.06937\\
+			\vdots\\
+			f_{<k, C>}(1.32817) - 1.32817\\
+			f_{<k, C>}(1.32817) - 1.33305\\
+			f_{<k, C>}(1.33305) - 1.33305
+		\end{bmatrix}\\
+		\mathbf{J_r} = 
+		\begin{bmatrix}
+			\frac{\partial}{\partial k}f_{<k, C>}(1.03519) & \frac{\partial}{\partial C}f_{<k, C>}(1.03519)\\
+			\frac{\partial}{\partial k}f_{<k, C>}(1.06937) & \frac{\partial}{\partial C}f_{<k, C>}(1.06937)\\
+			\frac{\partial}{\partial k}f_{<k, C>}(1.12796) & \frac{\partial}{\partial C}f_{<k, C>}(1.12796)\\
+			\vdots&\vdots\\
+			\frac{\partial}{\partial k}f_{<k, C>}(1.32817) & \frac{\partial}{\partial C}f_{<k, C>}(1.32817)\\
+			\frac{\partial}{\partial k}f_{<k, C>}(1.32817) & \frac{\partial}{\partial C}f_{<k, C>}(1.32817)\\
+			\frac{\partial}{\partial k}f_{<k, C>}(1.33305) & \frac{\partial}{\partial C}f_{<k, C>}(1.33305)
+		\end{bmatrix}
+	$$
+	To obtain the Jacobian matrix of R, we used the Scilab function \texttt{derivative(fxn, var, order)}.
+	The Scilab script \texttt{PS2\_4.sce} performs the Gauss-Newton optimization with $P_{old} = [1\:1]^T$ and $tol = 1\times10^{-9}$.
+	The optimum parameters $[k, C]$ converge to $[0.1615294,1.3374996]$.
+	Therefore the optimum logistic model for the given appendix is
+	$$\highlight{\frac{dP}{dt}=0.1615294P(1.3374996-P)}
+	$$
+	And now, we obtain the general solution of the logistic growth model given above with $\Delta t=0.05$.
+	The result is shown in Scilab console.
+	Take note that the numerical solution obtained is somewhat different from the appendix table.
+	It is because we used optimal parameters for the logistic model, similar to curve fitting.
+	
+	\subsection{Gompertz Model}
+	The Gompertz growth model of yeast is given by
+	$$\frac{dP}{dt}=kP\ln(C-P)
+	$$
+	Similar to the logistic growth model, the function we want to optimize is (see next page):
+	\begin{landscape}
+	\footnotesize
+	$$\begin{aligned}
+		P_{n+1} &= P_n + \frac{k}{6}P_n\ln(C-P_n) + \frac{2k}{6}\left(P_n + \frac{1}{2}kP_n\ln(C-P_n)\right)\ln\left(C-\left(P_n + \frac{1}{2}kP_n\ln(C-P_n)\right)\right)\\
+				&+ \frac{2k}{6}\ln\left(C-P_n-\frac{1}{2}k\ln\left(C-P_n-\frac{1}{2}kP_n\ln(C-P_n)\right)\left(P_n+\frac{1}{2}kP_n\ln(C-P_n)\right)\right)\left(P_n+\frac{1}{2}k\ln\left(C-P_n-\frac{1}{2}kP_n\ln(C-P_n)\right)\left(P_n+\frac{1}{2}kP_n\ln(C-P_n)\right)\right)\\
+				&+ \frac{k}{6}\ln\left(C-P_n-k\ln\left(C-P_n-\frac{1}{2}k\ln\left(C-P_n-\frac{1}{2}kP_n\ln(C-P_n)\right)\left(P_n+\frac{1}{2}kP_n\ln(C-P_n)\right)\right)\left(P_n + \frac{1}{2}k\ln\left(C-P_n-\frac{1}{2}kP_n\ln(C-P_n)\right)\left(P_n+\frac{1}{2}kP_n\ln(C-P_n)\right)\right)\right)\\
+				& \left(P_n+k\ln\left(C-P_n-\frac{1}{2}k\ln\left(C-P_n-\frac{1}{2}kP_n\ln(C-P_n)\right)\left(P_n+\frac{1}{2}kP_n\ln(C-P_n)\right)\right)\left(P_n + \frac{1}{2}k\left(C-P_n-\frac{1}{2}kP_n\ln(C-P_n)\left(P_n+\frac{1}{2}kP_n\ln(C-P_n)\right)\right)\right)\right)
+	\end{aligned}$$
+	\normalsize
+	\end{landscape}
+	Solving the optimum parameters is also the same as done in the logistic model.
+	The optimum parameters $[k, C]$ converge to $[0.1615294,1.3374996]$.
+	Therefore the optimum logistic model for the given appendix is
+	$$\highlight{\frac{dP}{dt}=(0.2824938 + 0.0037822i)P\ln((-2.6785793-6.3601969i)-P)}
+	$$
+	You may wonder why this happened.
+	The Jacobian matrix has complex numbers in it. One reason is that Scilab encounters negative values and computes the natural logarithm of it, resulting to complex numbers.
+	Then the optimum parameters and the numerical solutions are now complex numbers.\\
+	And now, we obtain the general solution of the Gompertz growth model given above with $\Delta t=0.05$.
+	The result is shown in Scilab console.
+	Again, take note that the numerical solution obtained is different from the appendix table.\\
+	One may conclude that the Gompertz model is not appropriate to describe the growth of yeast.
+\end{document}
